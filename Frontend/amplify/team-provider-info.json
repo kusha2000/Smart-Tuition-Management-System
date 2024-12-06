@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-smarttuitionsystem-dev-bf2b2-authRole",
+      "UnauthRoleArn": "arn:aws:iam::050752635407:role/amplify-smarttuitionsystem-dev-bf2b2-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::050752635407:role/amplify-smarttuitionsystem-dev-bf2b2-authRole",
+      "Region": "eu-north-1",
+      "DeploymentBucketName": "amplify-smarttuitionsystem-dev-bf2b2-deployment",
+      "UnauthRoleName": "amplify-smarttuitionsystem-dev-bf2b2-unauthRole",
+      "StackName": "amplify-smarttuitionsystem-dev-bf2b2",
+      "StackId": "arn:aws:cloudformation:eu-north-1:050752635407:stack/amplify-smarttuitionsystem-dev-bf2b2/0c8bfad0-b384-11ef-91b3-06e325d67449",
+      "AmplifyAppId": "d1u6byslncj1nx"
+    },
+    "categories": {
+      "auth": {
+        "smarttuitionsystemac580f3c": {}
+      }
+    }
+  }
+}
