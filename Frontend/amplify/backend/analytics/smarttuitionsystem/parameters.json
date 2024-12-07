@@ -1,0 +1,21 @@
+{
+    "appName": "smarttuitionsystem",
+    "roleName": "pinpointLambdaRoled53ac971",
+    "cloudformationPolicyName": "cloudformationPolicyd53ac971",
+    "cloudWatchPolicyName": "cloudWatchPolicyd53ac971",
+    "pinpointPolicyName": "pinpointPolicyd53ac971",
+    "authPolicyName": "pinpoint_amplify_d53ac971",
+    "unauthPolicyName": "pinpoint_amplify_d53ac971",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}
