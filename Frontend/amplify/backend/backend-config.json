@@ -1,4 +1,26 @@
 {
+  "analytics": {
+    "smarttuitionsystem": {
+      "providerPlugin": "awscloudformation",
+      "service": "Pinpoint"
+    }
+  },
+  "api": {
+    "apia58a5afd": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "UserHandler"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "auth": {
     "smarttuitionsystemac580f3c": {
       "customAuth": false,
@@ -25,6 +47,31 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "UserHandler": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_UserHandler_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "UserHandler"
+        }
+      ]
+    },
+    "AMPLIFY_function_UserHandler_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "UserHandler"
+        }
+      ]
     }
   }
 }

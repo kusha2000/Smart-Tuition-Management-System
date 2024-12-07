@@ -4,7 +4,8 @@ import { Button } from "react-bootstrap";
 import Question from "../../components/Question";
 import Loader from "../../components/Loader";
 import swal from "sweetalert";
-import ReactSpinnerTimer from "react-spinner-timer";
+// import ReactSpinnerTimer from "react-spinner-timer";
+
 
 const UserQuestionsPage = () => {
   Number.prototype.zeroPad = function () {
@@ -83,6 +84,10 @@ const UserQuestionsPage = () => {
             Submit Quiz
           </Button>
           <div className="userQuestionsPage__content--spinner">
+            {/* Version Error 
+              ================
+            */}
+            {/* <ReactSpinnerTimer
             <ReactSpinnerTimer
               timeInSeconds={questions.length * 1 * 60}
               totalLaps={questions.length * 1 * 60}
@@ -91,6 +96,8 @@ const UserQuestionsPage = () => {
               }}
               isRefresh={false}
               isPause={false}
+
+            /> */}
             />
             <h4 style={{ marginTop: "18px" }}>{`${parseInt(
               timeRemaining / 60
