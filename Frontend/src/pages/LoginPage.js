@@ -25,7 +25,7 @@ const LoginPage = () => {
     const staticPassword = "12345";
 
     if (username === staticUsername && password === staticPassword) {
-      navigate("/adminprofile"); // Redirect to profile or desired page
+      navigate("/questions"); // Redirect to profile or desired page
     } else {
       alert("Invalid username or password!");
     }

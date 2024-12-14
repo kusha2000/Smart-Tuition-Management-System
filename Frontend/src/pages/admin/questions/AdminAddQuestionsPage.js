@@ -7,14 +7,15 @@ import "./AdminAddQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
 
 const AdminAddQuestionsPage = () => {
+  const [contentType, setContentType] = useState("text"); // Toggle between text or image input
   const [content, setContent] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [option1, setOption1] = useState("");
   const [option2, setOption2] = useState("");
   const [option3, setOption3] = useState("");
   const [option4, setOption4] = useState("");
   const [answer, setAnswer] = useState(null);
-  const [questions, setQuestions] = useState([]);  // Local state to simulate storing questions
+  const [questions, setQuestions] = useState([]);
 
   const navigate = useNavigate();
 
@@ -22,36 +23,37 @@ const AdminAddQuestionsPage = () => {
     setAnswer(e.target.value);
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   const submitHandler = (e) => {
     e.preventDefault();
 
-    // Ensure a valid answer is selected
     if (answer !== null && answer !== "n/a") {
       const newQuestion = {
-        content: content,
-        image: image,
-        option1: option1,
-        option2: option2,
-        option3: option3,
-        option4: option4,
-        answer: answer,
+        content: contentType === "text" ? content : null,
+        image: contentType === "image" ? image : null,
+        option1,
+        option2,
+        option3,
+        option4,
+        answer,
       };
 
-      // Simulate adding the question to local state
       setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
 
-      swal("Question Added!", `${content} successfully added`, "success");
+      swal("Question Added!", "Your question was successfully added.", "success");
 
-      // Clear the form after submission
+      // Clear form
       setContent("");
-      setImage("");
+      setImage(null);
       setOption1("");
       setOption2("");
       setOption3("");
       setOption4("");
       setAnswer(null);
 
-      // Redirect to the questions list or any other relevant page
       navigate("/adminQuestions");
     } else {
       swal("Invalid Answer", "Please select a valid correct answer.", "error");
@@ -67,83 +69,92 @@ const AdminAddQuestionsPage = () => {
         <FormContainer>
           <h2>Add Question</h2>
           <Form onSubmit={submitHandler}>
-            <Form.Group className="my-3" controlId="content">
-              <Form.Label>Question</Form.Label>
-              <Form.Control
-                style={{ textAlign: "top" }}
-                as="textarea"
-                rows="3"
-                type="text"
-                placeholder="Enter Question Content"
-                value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
-                }}
-              ></Form.Control>
-            </Form.Group>
+            <div className="contentTypeToggle my-3">
+              <Form.Check
+                inline
+                type="radio"
+                label="Type Question"
+                name="contentType"
+                value="text"
+                checked={contentType === "text"}
+                onChange={(e) => setContentType(e.target.value)}
+              />
+              <Form.Check
+                inline
+                type="radio"
+                label="Upload Image"
+                name="contentType"
+                value="image"
+                checked={contentType === "image"}
+                onChange={(e) => setContentType(e.target.value)}
+              />
+            </div>
+
+            {contentType === "text" ? (
+              <Form.Group className="my-3" controlId="content">
+                <Form.Label>Question</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows="3"
+                  type="text"
+                  placeholder="Enter Question Content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                />
+              </Form.Group>
+            ) : (
+              <Form.Group className="my-3" controlId="image">
+                <Form.Label>Upload Question Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </Form.Group>
+            )}
 
             <Form.Group className="my-3" controlId="option1">
               <Form.Label>Option 1</Form.Label>
               <Form.Control
-                style={{ textAlign: "top" }}
-                as="textarea"
-                rows="2"
                 type="text"
                 placeholder="Enter Option 1"
                 value={option1}
-                onChange={(e) => {
-                  setOption1(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setOption1(e.target.value)}
+              />
             </Form.Group>
 
             <Form.Group className="my-3" controlId="option2">
               <Form.Label>Option 2</Form.Label>
               <Form.Control
-                style={{ textAlign: "top" }}
-                as="textarea"
-                rows="2"
                 type="text"
                 placeholder="Enter Option 2"
                 value={option2}
-                onChange={(e) => {
-                  setOption2(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setOption2(e.target.value)}
+              />
             </Form.Group>
 
             <Form.Group className="my-3" controlId="option3">
               <Form.Label>Option 3</Form.Label>
               <Form.Control
-                style={{ textAlign: "top" }}
-                as="textarea"
-                rows="2"
                 type="text"
                 placeholder="Enter Option 3"
                 value={option3}
-                onChange={(e) => {
-                  setOption3(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setOption3(e.target.value)}
+              />
             </Form.Group>
 
             <Form.Group className="my-3" controlId="option4">
               <Form.Label>Option 4</Form.Label>
               <Form.Control
-                style={{ textAlign: "top" }}
-                as="textarea"
-                rows="2"
                 type="text"
                 placeholder="Enter Option 4"
                 value={option4}
-                onChange={(e) => {
-                  setOption4(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setOption4(e.target.value)}
+              />
             </Form.Group>
 
             <div className="my-3">
-              <label htmlFor="answer-select">Choose Correct Option:</label>
+              <Form.Label>Choose Correct Option:</Form.Label>
               <Form.Select
                 aria-label="Choose Correct Option"
                 id="answer-select"

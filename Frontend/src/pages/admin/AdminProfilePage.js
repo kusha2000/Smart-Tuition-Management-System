@@ -21,13 +21,7 @@ const AdminProfilePage = () => {
         <Sidebar />
       </div>
       <div className="adminProfilePage__content">
-        <Image
-          className="adminProfilePage__content--profilePic"
-          width="20%"
-          height="20%"
-          roundedCircle
-          src="images/user.png"
-        />
+       
 
         <Table bordered className="adminProfilePage__content--table">
           <tbody>
