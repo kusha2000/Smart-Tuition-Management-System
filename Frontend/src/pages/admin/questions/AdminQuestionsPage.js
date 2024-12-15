@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import Question from "../../../components/Question";
 import Loader from "../../../components/Loader";
+import { db } from "../../../config/firebase"; 
+import { collection, getDocs } from "firebase/firestore";
 
 const AdminQuestionsPage = () => {
   const navigate = useNavigate();
@@ -13,24 +15,34 @@ const AdminQuestionsPage = () => {
   const quizId = new URLSearchParams(window.location.search).get("quizId");
   const quizTitle = new URLSearchParams(window.location.search).get("quizTitle");
 
-  // Simulate adding a new question
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, "questions"));
+        const questionsList = querySnapshot.docs.map((doc) => ({
+          id: doc.id, // Ensure the document ID is included
+          ...doc.data(),
+        }));
+        setQuestions(questionsList);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
   const addNewQuestionHandler = () => {
     navigate(`/adminAddQuestion/?quizId=${quizId}`);
   };
 
-  // Simulate fetching questions when the component mounts
-  React.useEffect(() => {
-    setLoading(true);
-    // Simulate fetching questions
-    setTimeout(() => {
-      const mockQuestions = [
-        { content: "What is React?", option1: "Library", option2: "Framework", option3: "Language", option4: "Database", answer: "option1" },
-        { content: "What is useState?", option1: "A hook", option2: "A component", option3: "A function", option4: "An event", answer: "option1" },
-      ];
-      setQuestions(mockQuestions);
-      setLoading(false);
-    }, 1000); // Simulate loading time
-  }, []);
+  const handleDeleteQuestion = (deletedQuestionId) => {
+    // Filter out the deleted question from local state
+    setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== deletedQuestionId));
+  };
 
   return (
     <div className="adminQuestionsPage__container">
@@ -45,11 +57,18 @@ const AdminQuestionsPage = () => {
         >
           Add Question
         </Button>
+
         {loading ? (
           <Loader />
         ) : (
           questions.map((q, index) => (
-            <Question key={index} number={index + 1} question={q} isAdmin={true} />
+            <Question
+              key={q.id} // Use the unique ID for the key
+              number={index + 1}
+              question={q}
+              isAdmin={true}
+              onDelete={handleDeleteQuestion} // Pass delete handler as a prop
+            />
           ))
         )}
       </div>
