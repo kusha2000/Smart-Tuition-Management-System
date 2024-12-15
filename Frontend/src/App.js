@@ -32,7 +32,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         {/* Redirect to "/signup" if no matching route */}
-        <Route path="/" element={<Navigate to="/signup" />} />
+        <Route path="/" element={<Navigate to="/signup" />} /> 
         <Route path="/adminProfile" element={<AdminProfilePage />} />
         <Route path="/adminCategories" element={<AdminCategoriesPage />} />
         <Route path="/adminAddCategory" element={<AdminAddCategoryPage />} />
