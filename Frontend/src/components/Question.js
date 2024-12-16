@@ -4,9 +4,9 @@ import "./Question.css";
 import { useNavigate } from "react-router-dom";
 import swal from "sweetalert";
 import { doc, deleteDoc } from "firebase/firestore";
-import { db } from "../config/firebase"; // Assuming this is the correct path
+import { db } from "../config/firebase"; 
 
-const Question = ({ number, question, isAdmin = false, onDelete }) => {
+const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => {
   const navigate = useNavigate();
   const [answers, setAnswers] = useState(
     JSON.parse(localStorage.getItem("answers")) || {}
@@ -19,11 +19,11 @@ const Question = ({ number, question, isAdmin = false, onDelete }) => {
   };
 
   const updateQuestionHandler = (ques) => {
-    navigate(`/adminUpdateQuestion/${ques.quesId}/?quizId=${ques.quiz.quizId}`);
+   
+    onUpdate(ques.id);
   };
 
   const deleteQuestionHandler = async (ques) => {
-    console.log(`Delete handler triggered for question id: ${ques.id}`); // Debugging
     swal({
       title: "Are you sure?",
       text: "Once deleted, you will not be able to recover this question!",
@@ -33,11 +33,10 @@ const Question = ({ number, question, isAdmin = false, onDelete }) => {
     }).then(async (willDelete) => {
       if (willDelete) {
         try {
-          // Delete the question from Firestore
-          const questionRef = doc(db, "questions", ques.id); // Assuming `ques.id` is the document ID
+          const questionRef = doc(db, "questions", ques.id);
           await deleteDoc(questionRef);
           swal("Question Deleted!", `Question with id ${ques.id} successfully deleted`, "success");
-          onDelete(ques.id); // Trigger the parent callback to update the UI
+          onDelete(ques.id); 
         } catch (error) {
           console.error("Error deleting question:", error);
           swal("Error", "Failed to delete question. Please try again.", "error");
@@ -86,7 +85,7 @@ const Question = ({ number, question, isAdmin = false, onDelete }) => {
           <hr />
           <div className="question__content--editButtons">
             <div
-              onClick={() => updateQuestionHandler(question)}
+              onClick={() => updateQuestionHandler(question)} 
               style={{
                 margin: "2px 8px",
                 textAlign: "center",
