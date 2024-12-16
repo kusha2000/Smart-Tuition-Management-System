@@ -5,6 +5,8 @@ import FormContainer from "../../../components/FormContainer";
 import Sidebar from "../../../components/Sidebar";
 import "./AdminAddQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../../config/firebase"; 
 
 const AdminAddQuestionsPage = () => {
   const [contentType, setContentType] = useState("text"); // Toggle between text or image input
@@ -22,39 +24,46 @@ const AdminAddQuestionsPage = () => {
   const onSelectAnswerHandler = (e) => {
     setAnswer(e.target.value);
   };
-
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
 
     if (answer !== null && answer !== "n/a") {
-      const newQuestion = {
-        content: contentType === "text" ? content : null,
-        image: contentType === "image" ? image : null,
-        option1,
-        option2,
-        option3,
-        option4,
-        answer,
-      };
+      try {
+        // Prepare question data
+        const newQuestion = {
+          content: contentType === "text" ? content : null,
+          image: contentType === "image" ? image?.name : null,
+          option1,
+          option2,
+          option3,
+          option4,
+          answer,
+          timestamp: new Date(),
+        };
 
-      setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
+        
+        await addDoc(collection(db, "questions"), newQuestion);
 
-      swal("Question Added!", "Your question was successfully added.", "success");
+        swal("Question Added!", "Your question was successfully added.", "success");
 
-      // Clear form
-      setContent("");
-      setImage(null);
-      setOption1("");
-      setOption2("");
-      setOption3("");
-      setOption4("");
-      setAnswer(null);
+        // Clear form
+        setContent("");
+        setImage(null);
+        setOption1("");
+        setOption2("");
+        setOption3("");
+        setOption4("");
+        setAnswer(null);
 
-      navigate("/adminQuestions");
+        navigate("/adminQuestions");
+      } catch (error) {
+        console.error("Error adding question: ", error);
+        swal("Error", "Failed to add question. Please try again.", "error");
+      }
     } else {
       swal("Invalid Answer", "Please select a valid correct answer.", "error");
     }
