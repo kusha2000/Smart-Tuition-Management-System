@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { InputGroup } from "react-bootstrap";
+import { Image, InputGroup } from "react-bootstrap";
 import "./Question.css";
 import { useNavigate } from "react-router-dom";
 import swal from "sweetalert";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "../config/firebase"; 
 
-const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => {
+const Question = ({ number, question, isAdmin = false, onDelete, onUpdate, imageUrl }) => {
   const navigate = useNavigate();
   const [answers, setAnswers] = useState(
     JSON.parse(localStorage.getItem("answers")) || {}
@@ -19,7 +19,6 @@ const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => 
   };
 
   const updateQuestionHandler = (ques) => {
-   
     onUpdate(ques.id);
   };
 
@@ -47,9 +46,22 @@ const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => 
     });
   };
 
+  console.log(question.image);
+  
+
   return (
     <div className="question__container">
-      <div className="question__content">{number + ". " + question.content}</div>
+      {/* Conditional Rendering for Content */}
+      {question.content === null ? (
+        question.image ? (
+          <Image src={question.image} width={50} height={50} className="question__image" />
+        ) : (
+          <div>No image available</div>
+        )
+      ) : (
+        <div className="question__content">{number + ". " + question.content}</div>
+      )}
+
       <div className="question__options">
         <InputGroup
           onChange={(e) => {
@@ -79,6 +91,7 @@ const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => 
           </div>
         </InputGroup>
       </div>
+
       {isAdmin && (
         <div>
           <p style={{ margin: "5px" }}>{`Correct Answer: ${question[question.answer]}`}</p>
@@ -112,7 +125,10 @@ const Question = ({ number, question, isAdmin = false, onDelete, onUpdate }) => 
           </div>
         </div>
       )}
+
+      
     </div>
+    
   );
 };
 
