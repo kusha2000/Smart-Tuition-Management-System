@@ -43,7 +43,8 @@ function App() {
         <Route path="/adminQuestions" element={<AdminQuestionsPage />} />
         <Route path="/adminAddQuestion" element={<AdminAddQuestionsPage />} />
         <Route path="/adminallResult" element={<AdminQuizResultPage />} />
-        <Route path="/adminUpdateQuestion/:quesId" element={<AdminUpdateQuestionPage />} />
+        <Route path="/adminUpdateQuestion/:firebaseId" element={<AdminUpdateQuestionPage />} />
+        {/* <Route path="/update" element={<AdminUpdateQuestionPage />} /> */}
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/quizzes" element={<UserQuizzesPage />} />
         <Route path="/quiz/*" element={<UserQuizzesPage />} />

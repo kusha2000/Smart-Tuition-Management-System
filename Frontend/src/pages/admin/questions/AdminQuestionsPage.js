@@ -5,13 +5,13 @@ import { Button } from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import Question from "../../../components/Question";
 import Loader from "../../../components/Loader";
-import { db } from "../../../config/firebase"; 
+import { db } from "../../../config/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 const AdminQuestionsPage = () => {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]); // Local state to store questions
-  const [loading, setLoading] = useState(false); // Loading state for simulating data fetch
+  const [questions, setQuestions] = useState([]); 
+  const [loading, setLoading] = useState(false); 
   const quizId = new URLSearchParams(window.location.search).get("quizId");
   const quizTitle = new URLSearchParams(window.location.search).get("quizTitle");
 
@@ -21,7 +21,7 @@ const AdminQuestionsPage = () => {
       try {
         const querySnapshot = await getDocs(collection(db, "questions"));
         const questionsList = querySnapshot.docs.map((doc) => ({
-          id: doc.id, // Ensure the document ID is included
+          id: doc.id, 
           ...doc.data(),
         }));
         setQuestions(questionsList);
@@ -40,8 +40,12 @@ const AdminQuestionsPage = () => {
   };
 
   const handleDeleteQuestion = (deletedQuestionId) => {
-    // Filter out the deleted question from local state
     setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== deletedQuestionId));
+  };
+
+  const handleUpdateQuestion = (updateQuestionId) => {
+  
+    navigate(`/adminUpdateQuestion/${updateQuestionId}`);
   };
 
   return (
@@ -63,11 +67,12 @@ const AdminQuestionsPage = () => {
         ) : (
           questions.map((q, index) => (
             <Question
-              key={q.id} // Use the unique ID for the key
+              key={q.id} 
               number={index + 1}
               question={q}
               isAdmin={true}
-              onDelete={handleDeleteQuestion} // Pass delete handler as a prop
+              onDelete={handleDeleteQuestion}
+              onUpdate={handleUpdateQuestion} 
             />
           ))
         )}
