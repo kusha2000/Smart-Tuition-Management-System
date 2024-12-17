@@ -5,11 +5,11 @@ import FormContainer from "../../../components/FormContainer";
 import Sidebar from "../../../components/Sidebar";
 import "./AdminAddQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../../config/firebase"; 
+import { collection, addDoc, getDoc, doc, updateDoc, setDoc } from "firebase/firestore";
+import { db } from "../../../config/firebase";
 
 const AdminAddQuestionsPage = () => {
-  const [contentType, setContentType] = useState("text"); // Toggle between text or image input
+  const [contentType, setContentType] = useState("text");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -25,14 +25,14 @@ const AdminAddQuestionsPage = () => {
     setAnswer(e.target.value);
   };
 
-  // Handle image file change and upload to Cloudinary
+  
   const handleImageChange = async (e) => {
-    const file = e.target.files[0]; // Get the image file
+    const file = e.target.files[0];
 
-    if (!file) return;  // If no file is selected, exit the function
+    if (!file) return;
 
     const data = new FormData();
-    data.append("file", file);  // Use the selected file
+    data.append("file", file);
     data.append("upload_preset", "smart-tuition");
     data.append("cloud_name", "dlbvyir2f");
 
@@ -47,9 +47,9 @@ const AdminAddQuestionsPage = () => {
       }
 
       const uploadedImageURL = await res.json();
-      setImageUrl(uploadedImageURL.url); // Correctly update the image URL state
+      setImageUrl(uploadedImageURL.url);
 
-      console.log(uploadedImageURL.url);  // Log the URL of the uploaded image
+      console.log(uploadedImageURL.url);
 
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -58,13 +58,37 @@ const AdminAddQuestionsPage = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-  
+
     if (answer !== null && answer !== "n/a") {
       try {
-        // Prepare question data
+        
+        if (contentType === "image" && !imageUrl) {
+          throw new Error("Image upload failed. Please try again.");
+        }
+
+        
+        const counterDocRef = doc(db, "counters", "questionIdCounter");
+        const counterDoc = await getDoc(counterDocRef);
+
+        let newQuestionId = 1;
+
+        if (!counterDoc.exists()) {
+          
+          await setDoc(counterDocRef, { lastId: 1 });
+        } else {
+          
+          const lastId = counterDoc.data().lastId;
+          newQuestionId = lastId + 1;
+
+          
+          await updateDoc(counterDocRef, { lastId: newQuestionId });
+        }
+
+        
         const newQuestion = {
+          questionId: newQuestionId,  
           content: contentType === "text" ? content : null,
-          image: contentType === "image" && imageUrl ? imageUrl : null, // Only set image URL if image is uploaded
+          image: contentType === "image" && imageUrl ? imageUrl : null,
           option1,
           option2,
           option3,
@@ -72,18 +96,13 @@ const AdminAddQuestionsPage = () => {
           answer,
           timestamp: new Date(),
         };
-  
-        // Check if imageUrl is properly set and do not add 'image' if it is undefined
-        if (contentType === "image" && !imageUrl) {
-          throw new Error('Image upload failed. Please try again.');
-        }
-  
-        // Add the new question to Firebase
+
+        
         await addDoc(collection(db, "questions"), newQuestion);
-  
+
         swal("Question Added!", "Your question was successfully added.", "success");
-  
-        // Clear form fields
+
+        
         setContent("");
         setImage(null);
         setOption1("");
@@ -91,7 +110,7 @@ const AdminAddQuestionsPage = () => {
         setOption3("");
         setOption4("");
         setAnswer(null);
-  
+
         navigate("/adminQuestions");
       } catch (error) {
         console.error("Error adding question: ", error);
@@ -101,7 +120,6 @@ const AdminAddQuestionsPage = () => {
       swal("Invalid Answer", "Please select a valid correct answer.", "error");
     }
   };
-  
 
   return (
     <div className="adminAddQuestionPage__container">
