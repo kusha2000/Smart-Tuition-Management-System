@@ -3,33 +3,48 @@ import "./UserQuestionsPage.css";
 import { Button } from "react-bootstrap";
 import swal from "sweetalert";
 import Loader from "../../components/Loader";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
-// Question Component with options
-const Question = ({ number, question, onSelectAnswer }) => {
+
+const Question = ({ number, question, onSelectAnswer, userAnswer }) => {
+  const options = [
+    question.option1,
+    question.option2,
+    question.option3,
+    question.option4,
+  ];
+
   return (
     <div className="question">
-      <h3>{`Q${number}`}</h3>
-      {question.type === "text" ? (
-        <p>{question.content}</p>
+      {question.content === null ? (
+        question.image ? (
+          <img
+            src={question.image}
+            alt={`Question ${number}`}
+            width="800"
+            height="800"
+            className="question__image"
+          />
+        ) : (
+          <div>No image available</div>
+        )
       ) : (
-        <img
-          src={question.content}
-          alt={`Question ${number}`}
-          style={{ width: "400px", height: "auto", marginTop: "10px" }}
-        />
+        <div className="question__content">{number + ". " + question.content}</div>
       )}
 
       <div className="options">
-        {question.options.map((option, index) => (
+        {options.map((option, index) => (
           <div key={index} className="option">
             <input
               type="radio"
-              id={`option-${question.questionId}-${index}`}
-              name={`question-${question.questionId}`}
+              id={`option-${question.id}-${index}`}
+              name={`question-${question.id}`}
               value={option}
-              onChange={() => onSelectAnswer(question.questionId, option)}
+              checked={userAnswer === option}
+              onChange={() => onSelectAnswer(question.id, option)}
             />
-            <label htmlFor={`option-${question.questionId}-${index}`}>{option}</label>
+            <label htmlFor={`option-${question.id}-${index}`}>{option}</label>
           </div>
         ))}
       </div>
@@ -38,74 +53,49 @@ const Question = ({ number, question, onSelectAnswer }) => {
 };
 
 const UserQuestionsPage = () => {
-  Number.prototype.zeroPad = function () {
-    return ("0" + this).slice(-2);
-  };
-
   const quizId = "1";
   const quizTitle = "Sample Quiz";
 
-  // Dummy questions data with options
-  const [questions, setQuestions] = useState([
-    { 
-      questionId: 1, 
-      type: "text", 
-      content: "What is React?", 
-      options: ["A JavaScript Library", "A CSS Framework", "A Database", "A Server"] 
-    },
-    { 
-      questionId: 2, 
-      type: "text", 
-      content: "What is JSX?", 
-      options: ["JavaScript XML", "Java Syntax Extension", "JavaScript Extension", "None of the Above"] 
-    },
-    { 
-      questionId: 3, 
-      type: "image", 
-      content: "https://via.placeholder.com/400", 
-      options: ["Option 1", "Option 2", "Option 3", "Option 4"] 
-    },
-    { 
-      questionId: 4, 
-      type: "text", 
-      content: "What is state in React?", 
-      options: ["An object that stores data", "A CSS property", "A server-side data", "None of the above"] 
-    },
-    { 
-      questionId: 5, 
-      type: "image", 
-      content: "https://via.placeholder.com/400", 
-      options: ["Option A", "Option B", "Option C", "Option D"] 
-    },
-  ]);
-
-  const [timeRemaining, setTimeRemaining] = useState(questions.length * 2 * 60);
+  const [questions, setQuestions] = useState([]);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [userAnswers, setUserAnswers] = useState({});
-
-  let intervalId = null;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    intervalId = setInterval(() => {
-      if (timeRemaining <= 0) {
-        submitQuizHandler(true);
-      } else {
-        setTimeRemaining((prev) => prev - 1);
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, "questions"));
+        const questionsList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setQuestions(questionsList);
+        setTimeRemaining(questionsList.length * 2 * 60); 
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
       }
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-      intervalId = null;
     };
+
+    fetchQuestions();
+  }, []);
+
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      submitQuizHandler(true);
+    } else {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
   }, [timeRemaining]);
 
   const submitQuizHandler = (isTimesUp = false) => {
     if (isTimesUp) {
-      swal(
-        "Quiz Submitted!",
-        `You have completed the quiz: ${quizTitle}.`,
-        "success"
-      );
+      swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
     } else {
       swal({
         title: "Are you sure?",
@@ -115,16 +105,10 @@ const UserQuestionsPage = () => {
         dangerMode: true,
       }).then((willSubmit) => {
         if (willSubmit) {
-          swal(
-            "Quiz Submitted!",
-            `You have completed the quiz: ${quizTitle}.`,
-            "success"
-          );
+          swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
         }
       });
     }
-    clearInterval(intervalId);
-    intervalId = null;
   };
 
   const handleAnswerSelection = (questionId, selectedAnswer) => {
@@ -137,32 +121,50 @@ const UserQuestionsPage = () => {
   return (
     <div className="userQuestionsPage__container">
       <div className="userQuestionsPage__content">
-        <h2>{`Questions : ${quizTitle}`}</h2>
+        <h2>{`Questions: ${quizTitle}`}</h2>
         <div className="userQuestionsPage__content--options">
           <Button
             className="userQuestionsPage__content--button"
-            onClick={() => submitQuizHandler()}
+            onClick={() => submitQuizHandler(false)}
+            disabled={Object.keys(userAnswers).length !== questions.length}
           >
             Submit Quiz
           </Button>
-          <div className="userQuestionsPage__content--spinner">
-            <h4 style={{ marginTop: "18px" }}>{`${parseInt(
-              timeRemaining / 60
-            ).zeroPad()} : ${(timeRemaining % 60).zeroPad()}`}</h4>
-            Timer
+          <div className="userQuestionsPage__content--timer">
+            <h4 style={{ marginTop: "18px" }}>
+              {String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:
+              {String(timeRemaining % 60).padStart(2, "0")} Timer
+            </h4>
           </div>
         </div>
-        {questions.length > 0 ? (
+        {loading ? (
+          <Loader />
+        ) : questions.length > 0 ? (
           questions.map((q, index) => (
             <Question
-              key={q.questionId}
+              key={q.id}
               number={index + 1}
               question={q}
+              userAnswer={userAnswers[q.id]}
               onSelectAnswer={handleAnswerSelection}
             />
           ))
         ) : (
-          <Loader />
+          <p>No questions found.</p>
+        )}
+        
+        {Object.keys(userAnswers).length === questions.length && (
+          <div className="userQuestionsPage__summary">
+            <h3>Your Answers</h3>
+            <ul>
+              {questions.map((q, index) => (
+                <li key={q.id}>
+                  <strong>{`Q${index + 1}: ${q.content || "Image-based question"}`}</strong>
+                  <p>{`Your answer: ${userAnswers[q.id]}`}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
