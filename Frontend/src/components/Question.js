@@ -54,7 +54,7 @@ const Question = ({ number, question, isAdmin = false, onDelete, onUpdate, image
       {/* Conditional Rendering for Content */}
       {question.content === null ? (
         question.image ? (
-          <Image src={question.image} width={50} height={50} className="question__image" />
+          <Image src={question.image} width={800} height={800} className="question__image" />
         ) : (
           <div>No image available</div>
         )
