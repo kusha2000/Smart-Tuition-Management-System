@@ -4,7 +4,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
 
-const Header = () => {
+const Header = ({ signOutFun }) => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Local state to manage login status
   const [userName, setUserName] = useState("Guest"); // Example user name for display
@@ -28,7 +28,7 @@ const Header = () => {
             <Nav>
               {/* Home Button */}
               <LinkContainer to="/">
-                <Nav.Link className="logoutbutton">Log Out</Nav.Link>
+              <button onClick={signOutFun} className="logoutbutton">Sign Out</button>
               </LinkContainer>
             </Nav>
           </Navbar.Collapse>
