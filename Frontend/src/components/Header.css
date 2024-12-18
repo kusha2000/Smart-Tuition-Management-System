@@ -1,0 +1,78 @@
+.navbar-collapse {
+    display: flex; /* Ensures items inside Navbar collapse are flexible */
+    justify-content: space-between; /* Space between brand and nav items */
+  }
+  
+  .navbar-nav {
+    margin-left: auto; /* Pushes navigation items to the right */
+  }
+  
+  .home-link:hover {
+    color: #ffc107; /* Highlight on hover */
+  }
+
+  header {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow at the bottom */
+    position: sticky; /* Sticks navbar to the top on scroll */
+    top: 0;
+    z-index: 1000; /* Ensures it stays above other content */
+  }
+
+  .navbar {
+    background-color: #343a40; /* Dark theme */
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem; /* Slightly larger font for brand */
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px; /* Space between letters */
+    transition: color 0.3s ease;
+    padding-left: 10px;
+    position: relative;
+    top: 8px; /* Moves the title 5px down */
+    
+  }
+
+  .navbar-nav .home-link button {
+    background-color: #ffcc80; /* Light orange button */
+    color: #343a40; /* Dark text for contrast */
+    border: none;
+    padding: 8px 20px; /* Padding for oval shape */
+    border-radius: 20px; /* Makes it oval */
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .navbar-nav .home-link button:hover {
+    background-color: #ffc107; /* Darker orange on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+  }
+
+  .logoutbutton {
+    background-color: #ffc107; /* Orange background */
+    color: #ffffff; /* White text */
+    border: none; /* Remove default border */
+    padding: 10px 20px; /* Padding for the oval shape */
+    border-radius: 30px; /* Makes the button oval-shaped */
+    font-size: 0.8rem; /* Medium font size */
+    font-weight: bold; /* Bold text for emphasis */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+    /* Position the button slightly above and to the left */
+  position: relative;
+  top: -17px; /* Moves it slightly up */
+  left: -10px; /* Moves it slightly to the left */
+  }
+  
+  .logoutbutton:hover {
+    background-color: #ffffff; /* Slightly darker orange on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+    color: #ffc107;
+  }
+
+  
+  

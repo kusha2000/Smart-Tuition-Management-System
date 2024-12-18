@@ -1,56 +1,101 @@
 import React, { useEffect, useState } from "react";
 import "./UserQuestionsPage.css";
 import { Button } from "react-bootstrap";
-import Question from "../../components/Question";
-import Loader from "../../components/Loader";
 import swal from "sweetalert";
-// import ReactSpinnerTimer from "react-spinner-timer";
+import Loader from "../../components/Loader";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
+
+const Question = ({ number, question, onSelectAnswer, userAnswer }) => {
+  const options = [
+    question.option1,
+    question.option2,
+    question.option3,
+    question.option4,
+  ];
+
+  return (
+    <div className="question">
+      {question.content === null ? (
+        question.image ? (
+          <img
+            src={question.image}
+            alt={`Question ${number}`}
+            width="800"
+            height="800"
+            className="question__image"
+          />
+        ) : (
+          <div>No image available</div>
+        )
+      ) : (
+        <div className="question__content">{number + ". " + question.content}</div>
+      )}
+
+      <div className="options">
+        {options.map((option, index) => (
+          <div key={index} className="option">
+            <input
+              type="radio"
+              id={`option-${question.id}-${index}`}
+              name={`question-${question.id}`}
+              value={option}
+              checked={userAnswer === option}
+              onChange={() => onSelectAnswer(question.id, option)}
+            />
+            <label htmlFor={`option-${question.id}-${index}`}>{option}</label>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const UserQuestionsPage = () => {
-  Number.prototype.zeroPad = function () {
-    return ("0" + this).slice(-2);
-  };
+  const quizId = "1";
+  const quizTitle = "Sample Quiz";
 
-  const quizId = "1"; // Example static quizId
-  const quizTitle = "Sample Quiz"; // Example static quiz title
-  const [quiz, setQuiz] = useState({
-    quizId: quizId,
-    title: quizTitle,
-  });
-  const [questions, setQuestions] = useState([
-    { questionId: 1, questionText: "What is React?" },
-    { questionId: 2, questionText: "What is JSX?" },
-    { questionId: 3, questionText: "What is state in React?" },
-    // Add more sample questions
-  ]);
-  const [timeRemaining, setTimeRemaining] = useState(questions.length * 2 * 60);
-
-  let answers = {};
-  let intervalId = null;
+  const [questions, setQuestions] = useState([]);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    intervalId = setInterval(() => {
-      if (timeRemaining <= 0) {
-        submitQuizHandler(true);
-      } else {
-        setTimeRemaining((prev) => prev - 1);
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, "questions"));
+        const questionsList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setQuestions(questionsList);
+        setTimeRemaining(questionsList.length * 2 * 60); 
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
       }
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-      intervalId = null;
     };
+
+    fetchQuestions();
+  }, []);
+
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      submitQuizHandler(true);
+    } else {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
   }, [timeRemaining]);
 
   const submitQuizHandler = (isTimesUp = false) => {
     if (isTimesUp) {
-      swal(
-        "Quiz Submitted!",
-        `You have completed the quiz: ${quizTitle}.`,
-        "success"
-      );
+      swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
     } else {
       swal({
         title: "Are you sure?",
@@ -60,57 +105,66 @@ const UserQuestionsPage = () => {
         dangerMode: true,
       }).then((willSubmit) => {
         if (willSubmit) {
-          swal(
-            "Quiz Submitted!",
-            `You have completed the quiz: ${quizTitle}.`,
-            "success"
-          );
+          swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
         }
       });
     }
-    clearInterval(intervalId);
-    intervalId = null;
+  };
+
+  const handleAnswerSelection = (questionId, selectedAnswer) => {
+    setUserAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: selectedAnswer,
+    }));
   };
 
   return (
     <div className="userQuestionsPage__container">
       <div className="userQuestionsPage__content">
-        <h2>{`Questions : ${quizTitle}`}</h2>
+        <h2>{`Questions: ${quizTitle}`}</h2>
         <div className="userQuestionsPage__content--options">
           <Button
             className="userQuestionsPage__content--button"
-            onClick={() => submitQuizHandler()}
+            onClick={() => submitQuizHandler(false)}
+            disabled={Object.keys(userAnswers).length !== questions.length}
           >
             Submit Quiz
           </Button>
-          <div className="userQuestionsPage__content--spinner">
-            {/* Version Error 
-              ================
-            */}
-            {/* <ReactSpinnerTimer
-            <ReactSpinnerTimer
-              timeInSeconds={questions.length * 1 * 60}
-              totalLaps={questions.length * 1 * 60}
-              onLapInteraction={() => {
-                submitQuizHandler(true);
-              }}
-              isRefresh={false}
-              isPause={false}
-
-            /> */}
-            />
-            <h4 style={{ marginTop: "18px" }}>{`${parseInt(
-              timeRemaining / 60
-            ).zeroPad()} : ${(timeRemaining % 60).zeroPad()}`}</h4>
-            Timer
+          <div className="userQuestionsPage__content--timer">
+            <h4 style={{ marginTop: "18px" }}>
+              {String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:
+              {String(timeRemaining % 60).padStart(2, "0")} Timer
+            </h4>
           </div>
         </div>
-        {questions.length > 0 ? (
-          questions.map((q, index) => {
-            return <Question key={index} number={index + 1} question={q} />;
-          })
-        ) : (
+        {loading ? (
           <Loader />
+        ) : questions.length > 0 ? (
+          questions.map((q, index) => (
+            <Question
+              key={q.id}
+              number={index + 1}
+              question={q}
+              userAnswer={userAnswers[q.id]}
+              onSelectAnswer={handleAnswerSelection}
+            />
+          ))
+        ) : (
+          <p>No questions found.</p>
+        )}
+        
+        {Object.keys(userAnswers).length === questions.length && (
+          <div className="userQuestionsPage__summary">
+            <h3>Your Answers</h3>
+            <ul>
+              {questions.map((q, index) => (
+                <li key={q.id}>
+                  <strong>{`Q${index + 1}: ${q.content || "Image-based question"}`}</strong>
+                  <p>{`Your answer: ${userAnswers[q.id]}`}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
