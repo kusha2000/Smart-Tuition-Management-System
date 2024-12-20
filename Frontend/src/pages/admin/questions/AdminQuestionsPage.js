@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./AdminQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
-import { Button } from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import Question from "../../../components/Question";
 import Loader from "../../../components/Loader";
 import { db } from "../../../config/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { Button, Container, Navbar,Nav } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 
 const AdminQuestionsPage = () => {
   const navigate = useNavigate();
@@ -48,7 +50,34 @@ const AdminQuestionsPage = () => {
     navigate(`/adminUpdateQuestion/${updateQuestionId}`);
   };
 
+  const { signOut } = useAuthenticator();
+  const handleSignOut = () => {
+    signOut();     
+    navigate("/");     
+  }; 
+
+
   return (
+    <>
+    <header>
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
+        <Container>
+          {/* Brand Title */}
+          <Navbar.Brand className="navbar-brand">
+            Smart Tuition Management System
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
+            <Nav>
+              {/* Home Button */}
+              <LinkContainer to="/">
+              <button onClick={handleSignOut} className="logoutbutton">Sign Out</button>
+              </LinkContainer>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </header>
     <div className="adminQuestionsPage__container">
       <div className="adminQuestionsPage__sidebar">
         <Sidebar />
@@ -78,6 +107,8 @@ const AdminQuestionsPage = () => {
         )}
       </div>
     </div>
+    </>
+    
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Button, Form } from "react-bootstrap";
 import swal from "sweetalert";
 import FormContainer from "../../../components/FormContainer";
 import Sidebar from "../../../components/Sidebar";
@@ -7,6 +6,9 @@ import "./AdminAddQuestionsPage.css";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, getDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
+import { Button, Container, Navbar,Nav,Form } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 const AdminAddQuestionsPage = () => {
   const [contentType, setContentType] = useState("text");
@@ -120,8 +122,33 @@ const AdminAddQuestionsPage = () => {
       swal("Invalid Answer", "Please select a valid correct answer.", "error");
     }
   };
+  const { signOut } = useAuthenticator();
+  const handleSignOut = () => {
+    signOut();     
+    navigate("/");     
+  }; 
 
   return (
+    <>
+    <header>
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
+        <Container>
+          {/* Brand Title */}
+          <Navbar.Brand className="navbar-brand">
+            Smart Tuition Management System
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
+            <Nav>
+              {/* Home Button */}
+              <LinkContainer to="/">
+              <button onClick={handleSignOut} className="logoutbutton">Sign Out</button>
+              </LinkContainer>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </header>
     <div className="adminAddQuestionPage__container">
       <div className="adminAddQuestionPage__sidebar">
         <Sidebar />
@@ -239,6 +266,8 @@ const AdminAddQuestionsPage = () => {
         </FormContainer>
       </div>
     </div>
+    </>
+    
   );
 };
 
