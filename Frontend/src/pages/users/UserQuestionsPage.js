@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./UserQuestionsPage.css";
-import { Button } from "react-bootstrap";
+import { Button, Container, Navbar,Nav } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import swal from "sweetalert";
 import Loader from "../../components/Loader";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
+import { useNavigate } from "react-router-dom";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import "../../components/Header.css";
 
 
 const Question = ({ number, question, onSelectAnswer, userAnswer }) => {
@@ -17,6 +21,7 @@ const Question = ({ number, question, onSelectAnswer, userAnswer }) => {
 
   return (
     <div className="question">
+
       {question.content === null ? (
         question.image ? (
           <img
@@ -95,7 +100,7 @@ const UserQuestionsPage = () => {
 
   const submitQuizHandler = (isTimesUp = false) => {
     if (isTimesUp) {
-      swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
+      // swal("Quiz Submitted!", `You have completed the quiz: ${quizTitle}.`, "success");
     } else {
       swal({
         title: "Are you sure?",
@@ -117,10 +122,38 @@ const UserQuestionsPage = () => {
       [questionId]: selectedAnswer,
     }));
   };
+  const { signOut } = useAuthenticator();
+  const navigate = useNavigate(); 
+  const handleSignOut = () => {
+    signOut();     
+    navigate("/");     
+  }; 
 
   return (
+    <>
+    <header>
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
+        <Container>
+          {/* Brand Title */}
+          <Navbar.Brand className="navbar-brand">
+            Smart Tuition Management System
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
+            <Nav>
+              {/* Home Button */}
+              <LinkContainer to="/">
+              <button onClick={handleSignOut} className="logoutbutton">Sign Out</button>
+              </LinkContainer>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </header>
     <div className="userQuestionsPage__container">
+      
       <div className="userQuestionsPage__content">
+      {/* <Button onClick={handleSignOut}>Sign Out</Button> */}
         <h2>{`Questions: ${quizTitle}`}</h2>
         <div className="userQuestionsPage__content--options">
           <Button
@@ -168,6 +201,8 @@ const UserQuestionsPage = () => {
         )}
       </div>
     </div>
+    </>
+    
   );
 };
 
