@@ -38,6 +38,9 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.0
   http: ^1.2.2
+  image: ^4.5.2
+  exif: ^3.3.0
+  flutter_exif_rotation: ^0.5.2
 
 dev_dependencies:
   flutter_test:
