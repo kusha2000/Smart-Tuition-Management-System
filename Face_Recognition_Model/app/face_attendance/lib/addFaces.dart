@@ -132,6 +132,12 @@ class _RegisterFaceScreenState extends State<RegisterFaceScreen> {
                           angle: _rotationAngle * 3.14159 / 180,
                           child: CameraPreview(_controller),
                         ),
+                        Center(
+                          child: CustomPaint(
+                            size: MediaQuery.of(context).size,
+                            painter: RectanglePainter(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -191,4 +197,30 @@ class _RegisterFaceScreenState extends State<RegisterFaceScreen> {
       ),
     );
   }
+}
+
+class RectanglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.green
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    final rectWidth = size.width * 0.7;
+    final rectHeight = size.height * 0.5;
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+
+    final rect = Rect.fromCenter(
+      center: Offset(centerX, centerY),
+      width: rectWidth,
+      height: rectHeight,
+    );
+
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
