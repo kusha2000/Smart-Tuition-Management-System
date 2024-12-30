@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera App')),
+      appBar: AppBar(title: const Text('Face Recognition App')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Open Camera'),
+              child: const Text('Identify Face'),
             ),
             ElevatedButton(
               onPressed: () {
