@@ -4,27 +4,33 @@ import { Button, Form } from "react-bootstrap";
 import swal from "sweetalert";
 import FormContainer from "../../../components/FormContainer";
 import Sidebar from "../../../components/Sidebar";
+import { db } from "../../../config/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const AdminAddCategoryPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  
-  // Simulate categories stored in local state
-  const [categories, setCategories] = useState([]);
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    const newCategory = { title, description };
+    const newCategory = { title, description, createdAt: new Date() };
 
-    // Simulate adding the category to the state
-    setCategories([...categories, newCategory]);
+    try {
+      // Add the new category to Firestore
+      const docRef = await addDoc(collection(db, "categories"), newCategory);
 
-    // Show success message
-    swal("Category Added!", `${title} successfully added`, "success");
+      // Show success message
+      swal("Category Added!", `${title} successfully added`, "success");
 
-    // Clear form fields
-    setTitle("");
-    setDescription("");
+      // Clear form fields
+      setTitle("");
+      setDescription("");
+
+      console.log("Document written with ID: ", docRef.id);
+    } catch (error) {
+      console.error("Error adding category: ", error);
+      swal("Error", "Failed to add category. Please try again.", "error");
+    }
   };
 
   return (
