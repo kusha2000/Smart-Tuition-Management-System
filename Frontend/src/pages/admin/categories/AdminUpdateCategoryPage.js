@@ -5,49 +5,63 @@ import swal from "sweetalert";
 import { useParams, useNavigate } from "react-router-dom";
 import FormContainer from "../../../components/FormContainer";
 import Sidebar from "../../../components/Sidebar";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../config/firebase";
+import { updateDoc } from "firebase/firestore"; 
 
 const AdminUpdateCategoryPage = () => {
   const navigate = useNavigate();
-  const params = useParams();
-  const catId = params.catId;
+  const { catId } = useParams();
 
-  // Simulate categories data in local state
-  const [categories, setCategories] = useState([
-    { catId: 1, title: "Category 1", description: "Description of Category 1" },
-    { catId: 2, title: "Category 2", description: "Description of Category 2" },
-  ]);
-  
-  // Find the category to be updated
-  const oldCategory = categories.find((cat) => cat.catId == catId);
-  
-  const [title, setTitle] = useState(oldCategory ? oldCategory.title : "");
-  const [description, setDescription] = useState(
-    oldCategory ? oldCategory.description : ""
-  );
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!oldCategory) {
-      swal("Category Not Found", "This category does not exist.", "error");
-      navigate("/adminCategories");
-    }
-  }, [oldCategory, navigate]);
+    console.log("Fetching category with ID:", catId); // Log the correct catId
+    const fetchCategory = async () => {
+      try {
+        const categoryRef = doc(db, "categories", catId);
+        const categorySnap = await getDoc(categoryRef);
+  
+        if (categorySnap.exists()) {
+          const categoryData = categorySnap.data();
+          setTitle(categoryData.title);
+          setDescription(categoryData.description);
+        } else {
+          swal("Category Not Found", "This category does not exist.", "error");
+          navigate("/adminCategories");
+        }
+      } catch (error) {
+        console.error("Error fetching category: ", error);
+        swal("Error", "Failed to fetch category. Please try again.", "error");
+        navigate("/adminCategories");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchCategory();
+  }, [catId, navigate]);
+  
+  
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-
-    // Simulate category update
-    const updatedCategory = { catId, title, description };
-    
-    // Update the category in the state
-    setCategories((prevCategories) =>
-      prevCategories.map((cat) =>
-        cat.catId === catId ? updatedCategory : cat
-      )
-    );
-
-    swal("Category Updated!", `${title} successfully updated`, "success");
-    navigate("/adminCategories");
+  
+    try {
+      const categoryRef = doc(db, "categories", catId); // Reference to the document
+      await updateDoc(categoryRef, { title, description }); // Use updateDoc to update the fields
+  
+      swal("Category Updated!", `${title} successfully updated`, "success");
+      navigate("/adminCategories"); // Navigate back after success
+    } catch (error) {
+      console.error("Error updating category: ", error);
+      swal("Error", "Failed to update category. Please try again.", "error");
+    }
   };
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="adminUpdateCategoryPage__container">
@@ -64,31 +78,24 @@ const AdminUpdateCategoryPage = () => {
                 type="text"
                 placeholder="Enter Category Title"
                 value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </Form.Group>
 
             <Form.Group className="my-3" controlId="description">
               <Form.Label>Description</Form.Label>
               <Form.Control
-                style={{ textAlign: "top" }}
                 as="textarea"
                 rows="5"
-                type="text"
                 placeholder="Enter Category Description"
                 value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                }}
-              ></Form.Control>
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </Form.Group>
 
             <Button
               className="my-3 adminUpdateCategoryPage__content--button"
               type="submit"
-              variant=""
             >
               Update
             </Button>

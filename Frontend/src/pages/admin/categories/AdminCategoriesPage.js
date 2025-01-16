@@ -48,8 +48,10 @@ const AdminCategoriesPage = () => {
 
   const updateCategoryHandler = (event, category) => {
     event.stopPropagation();
+    console.log("Navigating with catId:", category.id); // Log to verify
     navigate(`/adminUpdateCategory/${category.id}`);
   };
+  
 
   const deleteCategoryHandler = async (event, category) => {
     event.stopPropagation();

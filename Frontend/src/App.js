@@ -69,6 +69,7 @@ function App() {
         <Route path="/adminCategories" element={<AdminCategoriesPage />} />
         <Route path="/adminAddCategory" element={<AdminAddCategoryPage />} />
         <Route path="/adminUpdateCategory/:catId" element={<AdminUpdateCategoryPage />} />
+
         <Route path="/adminQuizzes" element={<AdminQuizzesPage />} />
         <Route path="/adminAddQuiz" element={<AdminAddQuiz />} />
         <Route path="/adminUpdateQuiz/:quizId" element={<AdminUpdateQuiz />} />
