@@ -6,26 +6,36 @@ import swal from "sweetalert";
 import Loader from "../../../components/Loader";
 import Message from "../../../components/Message";
 import Sidebar from "../../../components/Sidebar";
+import { db } from "../../../config/firebase"; // Import Firebase configuration
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 const AdminCategoriesPage = () => {
   const navigate = useNavigate();
 
-  // Simulate categories in local state
+  // State to manage categories
   const [categories, setCategories] = useState([]);
-  
-  // Simulate loading state
   const [loading, setLoading] = useState(false);
 
+  // Fetch categories from Firestore
   useEffect(() => {
-    // Simulate fetching categories
-    setLoading(true);
-    setTimeout(() => {
-      setCategories([
-        { catId: 1, title: "Category 1", description: "Description of Category 1" },
-        { catId: 2, title: "Category 2", description: "Description of Category 2" }
-      ]);
-      setLoading(false);
-    }, 1000); // Simulate network delay
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const categoriesCollection = collection(db, "categories");
+        const categorySnapshot = await getDocs(categoriesCollection);
+        const categoryList = categorySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCategories(categoryList);
+      } catch (error) {
+        console.error("Error fetching categories: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const categoryClickHandler = (catId) => {
@@ -38,10 +48,10 @@ const AdminCategoriesPage = () => {
 
   const updateCategoryHandler = (event, category) => {
     event.stopPropagation();
-    navigate(`/adminUpdateCategory/${category.catId}`);
+    navigate(`/adminUpdateCategory/${category.id}`);
   };
 
-  const deleteCategoryHandler = (event, category) => {
+  const deleteCategoryHandler = async (event, category) => {
     event.stopPropagation();
     swal({
       title: "Are you sure?",
@@ -49,15 +59,21 @@ const AdminCategoriesPage = () => {
       icon: "warning",
       buttons: true,
       dangerMode: true,
-    }).then((willDelete) => {
+    }).then(async (willDelete) => {
       if (willDelete) {
-        // Simulate deleting the category
-        setCategories(categories.filter((cat) => cat.catId !== category.catId));
-        swal(
-          "Category Deleted!",
-          `${category.title} successfully deleted`,
-          "success"
-        );
+        try {
+          // Delete the category from Firestore
+          await deleteDoc(doc(db, "categories", category.id));
+          setCategories(categories.filter((cat) => cat.id !== category.id));
+          swal(
+            "Category Deleted!",
+            `${category.title} successfully deleted`,
+            "success"
+          );
+        } catch (error) {
+          console.error("Error deleting category: ", error);
+          swal("Error", "Failed to delete category. Please try again.", "error");
+        }
       } else {
         swal(`${category.title} is safe`);
       }
@@ -76,59 +92,57 @@ const AdminCategoriesPage = () => {
         ) : categories.length === 0 ? (
           <Message>No categories are present. Try adding some categories.</Message>
         ) : (
-          categories.map((cat, index) => {
-            return (
-              <ListGroup
-                className="adminCategoriesPage__content--categoriesList"
-                key={index}
+          categories.map((cat, index) => (
+            <ListGroup
+              className="adminCategoriesPage__content--categoriesList"
+              key={index}
+            >
+              <ListGroup.Item
+                style={{ borderWidth: "0px" }}
+                className="d-flex"
+                onClick={() => categoryClickHandler(cat.id)}
               >
-                <ListGroup.Item
-                  style={{ borderWidth: "0px" }}
-                  className="d-flex"
-                  onClick={() => categoryClickHandler(cat.catId)}
+                <div className="ms-2 me-auto">
+                  <div className="fw-bold">{cat.title}</div>
+                  {cat.description}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    height: "90%",
+                    margin: "auto 2px",
+                  }}
                 >
-                  <div className="ms-2 me-auto">
-                    <div className="fw-bold">{cat.title}</div>
-                    {cat.description}
+                  <div
+                    onClick={(event) => updateCategoryHandler(event, cat)}
+                    style={{
+                      margin: "2px 8px",
+                      textAlign: "center",
+                      color: "rgb(68 177 49)",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Update
                   </div>
 
                   <div
+                    onClick={(event) => deleteCategoryHandler(event, cat)}
                     style={{
-                      display: "flex",
-                      height: "90%",
-                      margin: "auto 2px",
+                      margin: "2px 8px",
+                      textAlign: "center",
+                      color: "red",
+                      fontWeight: "500",
+                      cursor: "pointer",
                     }}
                   >
-                    <div
-                      onClick={(event) => updateCategoryHandler(event, cat)}
-                      style={{
-                        margin: "2px 8px",
-                        textAlign: "center",
-                        color: "rgb(68 177 49)",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Update
-                    </div>
-
-                    <div
-                      onClick={(event) => deleteCategoryHandler(event, cat)}
-                      style={{
-                        margin: "2px 8px",
-                        textAlign: "center",
-                        color: "red",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Delete
-                    </div>
+                    Delete
                   </div>
-                </ListGroup.Item>
-              </ListGroup>
-            );
-          })
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+          ))
         )}
         <Button
           variant=""
